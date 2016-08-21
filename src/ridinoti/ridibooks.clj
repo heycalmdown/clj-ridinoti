@@ -1,13 +1,11 @@
 (ns ridinoti.ridibooks
-  (:require [clojure.edn :as edn]
-            [clj-http.client :as http]
+  (:require [clj-http.client :as http]
+            [ridinoti.config :as config]
             [clojure.data.json :as json]))
 
-(def config (edn/read-string (slurp "config.edl")))
-
 (defn login [cs] (http/get "https://ridibooks.com/account/action/login"
-                           {:query-params {:user_id (-> config :ridi :user-id),
-                                           :password (-> config :ridi :password)}
+                           {:query-params {:user_id (config/get :ridi :user-id),
+                                           :password (config/get :ridi :password)}
                             :cookie-store cs}))
 
 (defn fetch [cs limit] (http/get "http://api.ridibooks.com/v0/notifications"

@@ -4,15 +4,18 @@
   (:require [ridinoti.telegram :as telegram])
   (:gen-class))
 
-(defn includes? [xs x] (boolean (some #{x} xs)))
+(defn includes? [xs x]
+  (boolean (some #{x} xs)))
 
-(defn side-effect [f] (fn [x] (f x) x))
+(defn side-effect [f]
+  (fn [x] (f x) x))
 
 (defn read [name]
   (try (edn/read-string (slurp name))
        (catch Exception e ())))
 
-(defn cache [name ids] (spit name (pr-str ids)))
+(defn cache [name ids]
+  (spit name (pr-str ids)))
 
 (defn -main []
   (let [pushed (read "/tmp/pushed.edn")]
