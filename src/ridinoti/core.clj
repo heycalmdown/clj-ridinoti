@@ -1,8 +1,11 @@
 (ns ridinoti.core
-  (:require [clojure.edn :as edn])
-  (:require [ridinoti.ridibooks :as ridi])
-  (:require [ridinoti.telegram :as telegram])
-  (:gen-class))
+  (:require [clojure.edn :as edn]
+            [ridinoti.config :as config]
+            [ridinoti.ridibooks :as ridi]
+            [ridinoti.telegram :as telegram]
+            [aws.sdk.s3 :as s3])
+  (:gen-class
+    :implements [com.amazonaws.services.lambda.runtime.RequestStreamHandler]))
 
 (defn includes? [xs x]
   (boolean (some #{x} xs)))
@@ -11,17 +14,19 @@
   (fn [x] (f x) x))
 
 (defn read [name]
-  (try (edn/read-string (slurp name))
-       (catch Exception e ())))
+  (try (edn/read-string
+         (slurp
+           (:content (s3/get-object (config/get :s3) "clj-ridinoti" name))))
+       (catch com.amazonaws.services.s3.model.AmazonS3Exception _ ())))
 
 (defn cache [name ids]
-  (spit name (pr-str ids)))
+  (s3/put-object (config/get :s3) "clj-ridinoti" name (pr-str ids)))
 
-(defn -main []
-  (let [pushed (read "/tmp/pushed.edn")]
+(defn -handleRequest [_ _ _ _]
+  (let [pushed (read "pushed.edn")]
     (->> (ridi/notifications 20)
          (filter #((complement includes?) pushed (:itemId %)))
          (map (side-effect telegram/push))
          (map :itemId)
          (concat pushed)
-         (cache "/tmp/pushed.edn"))))
+         (cache "pushed.edn"))))

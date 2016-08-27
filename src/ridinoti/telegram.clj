@@ -13,4 +13,4 @@
   (telegram/send-text (config/get :telegram :token)
                       (config/get :telegram :chat-id)
                       {:parse_mode "html"}
-                      (str (strip message) "\n" (base landingUrl))))
+                      (str "(clj) " (strip message) "\n" (base landingUrl))))
