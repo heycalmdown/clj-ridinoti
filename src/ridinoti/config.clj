@@ -1,7 +1,8 @@
 (ns ridinoti.config
-  (:require [clojure.edn :as edn]))
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]))
 
-(def config (edn/read-string (slurp "config.edl")))
+(def config (edn/read-string (slurp (io/resource "config.edl"))))
 
 (defn- private-get [config keys]
   (if (seq keys)
