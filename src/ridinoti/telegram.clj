@@ -7,10 +7,12 @@
   (s/replace item #"<p>|</p>" ""))
 
 (defn base [item]
-  (if-not (s/starts-with? item "http") (str "https://ridibooks.com" item)))
+  (if-not (s/starts-with? item "http")
+    (str "https://ridibooks.com" item)
+    item))
 
 (defn push [{:keys [message landingUrl]}]
   (telegram/send-text (config/get :telegram :token)
                       (config/get :telegram :chat-id)
                       {:parse_mode "html"}
-                      (str "(clj) " (strip message) "\n" (base landingUrl))))
+                      (str (strip message) "\n" (base landingUrl))))
